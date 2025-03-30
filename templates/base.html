@@ -3,30 +3,69 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>{% block title %}My shop{% endblock %}</title>
+    <title>{% block title %}Мой магазин{% endblock %}</title>
     <link href="{% static 'css/base.css' %}" rel="stylesheet">
-</head> 
+</head>
 <body>
     <div id="header">
-        <a href="/" class="logo">My shop</a>
+        <a href="/" class="logo">Мой магазин</a>
     </div>
+
     <div id="subheader">
         <div class="cart">
             {% with total_items=cart|length %}
                 {% if total_items > 0 %}
-                    B вашей корзине:
-                    <a href="{% url "cart:cart_detail" %}">
-                    {{ total_items }} тов. Сумма:
-                     {{ cart.get_total_price }} сом
+                    В вашей корзине:
+                    <a href="{% url 'view_cart' %}">
+                        {{ total_items }} тов. Сумма: {{ cart.get_total_price }} сом
                     </a>
                 {% else %}
                     Ваша корзина пуста
-                {% endif %} 
+                {% endif %}
             {% endwith %}
         </div>
     </div>
+
     <div id="content">
-        {% block content %} {% endblock %}
-    </div> 
+        <h1>Ваша корзина</h1>
+        {% if items %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Количество</th>
+                        <th>Цена</th>
+                        <th>Итог</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>
+                                <form method="POST" action="{% url 'update_cart' item.product.id %}">
+                                    {% csrf_token %}
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
+                                    <button type="submit">Обновить</button>
+                                </form>
+                            </td>
+                            <td>{{ item.product.price }} сом</td>
+                            <td>{{ item.subtotal }} сом</td>
+                            <td>
+                                <form method="POST" action="{% url 'remove_from_cart' item.product.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit">Удалить</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h2>Итоговая сумма: {{ total }} сом</h2>
+        {% else %}
+            <p>Ваша корзина пуста.</p>
+        {% endif %}
+    </div>
 </body>
 </html>
