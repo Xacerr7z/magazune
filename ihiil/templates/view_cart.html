@@ -1,0 +1,56 @@
+<!-- cart.html -->
+{% extends "base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+</head>
+<body>
+    <h1>Ваша корзина</h1>
+
+    {% if items %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Количество</th>
+                    <th>Цена</th>
+                    <th>Итог</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'update_cart' item.product.id %}">
+                                {% csrf_token %}
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
+                                <button type="submit">Обновить</button>
+                            </form>
+                        </td>
+                        <td>{{ item.product.price }} руб.</td>
+                        <td>{{ item.subtotal }} руб.</td>
+                        <td>
+                            <form method="POST" action="{% url 'remove_from_cart' item.product.id %}">
+                                {% csrf_token %}
+                                <button type="submit">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Итоговая сумма: {{ total }} руб.</h2>
+    {% else %}
+        <p>Ваша корзина пуста.</p>
+    {% endif %}
+
+    <a href="/">Продолжить покупки</a>
+</body>
+</html>
